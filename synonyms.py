@@ -119,7 +119,7 @@ def build_semantic_descriptors(sentences):
     total_dict = {}
 
     #Loop to read one sentence at a time from the list of sentences 
-    for sentence in sentences: 
+    for sentence in sentences:
         #Create a new list of unique words in the sentence 
         unique_in_sentence = set(sentence)
 
@@ -159,19 +159,16 @@ def build_semantic_descriptors_from_files(filenames):
         text += f.read() + " "
         f.close()
     
-    #Convert all text to lowercase
-    text = text.lower() 
+    # Convert all text to lowercase
+    text = text.lower()
 
-    #Split text into sentences using ., !, and ?
+    # Remove punctuation
+    punctuation = [",", "-", "--", ":", ";"]
+    for p in punctuation:
+        text = text.replace(p, " ")
+
+    # Split text into sentences using ., !, and ?
     sentences = re.split(r'[.!?]', text) 
-
-    #List of possible punctuation
-    punctuation = [",", "-", "--", ":", ";"] 
-
-    #Remove all punctuation  
-    for i in range(len(sentences)):
-        for p in punctuation:
-            sentences[i] = sentences[i].replace(p, " ") 
 
     #Convert each sentence into a list of words
     for i in range(len(sentences)):
@@ -185,8 +182,9 @@ def build_semantic_descriptors_from_files(filenames):
 
 
 def most_similar_word(word, choices, semantic_descriptors, similarity_fn):
-    best_choice = choices[0] 
-    best = -1 
+    best_choice = choices[0]
+    # Cosine function has a range of -1 to 1
+    best_score = -2
 
     #If the word is not a key or has not value in semantic_descriptors 
     #This also considers if semantic descriptor dictionary is empty 
@@ -201,16 +199,16 @@ def most_similar_word(word, choices, semantic_descriptors, similarity_fn):
         #This also considers if semantic descritor dictionary is empty  
         if choices[i] not in semantic_descriptors or not semantic_descriptors[choices[i]]:
             similarity = -1 
-        else: 
-            choice_vector = semantic_descriptors[choices[i]] 
+        else:
+            choice_vector = semantic_descriptors[choices[i]]
 
             similarity = similarity_fn(word_vector, choice_vector) 
         
         #Compare similarity between word and choice 
         #Greater than, NOT EQUAL. Ensures that if two choices has the same similarity, we take the first one (smallest index) 
-        if similarity > best: 
+        if similarity > best_score:
             best_choice = choices[i] 
-            best = similarity 
+            best_score = similarity
     
     return best_choice 
 
